@@ -136,18 +136,62 @@
     }
   });
   document.querySelectorAll('[data-print]').forEach(button => button.addEventListener('click', () => window.print()));
-  if ('IntersectionObserver' in window) {
-    const observed = ['education', 'research', 'projects', 'publications', 'contact'];
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          nav.querySelectorAll('a').forEach(link => link.classList.toggle('active', link.hash === `#${entry.target.id}`));
-        }
-      });
-    }, { rootMargin: '-10% 0px -65% 0px', threshold: 0 });
-    observed.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
-  }
   let savedLanguage = 'en';
   try { savedLanguage = localStorage.getItem('gheom-language') || 'en'; } catch (_) {}
   setLanguage(savedLanguage);
+})();
+// Pages: one section per page. Swipes, the pager buttons and the arrow keys move one page at a time.
+(() => {
+  const main = document.querySelector('main');
+  const pager = document.querySelector('.pager');
+  if (!main || !pager) return;
+  const pages = [...main.children].filter(el => el.tagName === 'SECTION');
+  const [prev, next] = pager.querySelectorAll('button');
+  const count = pager.querySelector('.pager-count');
+  const title = pager.querySelector('.pager-title');
+  const group = pager.querySelector('.pager-group');
+  const nav = document.querySelector('#main-nav');
+  // A page's chapter is the menu group that links to it.
+  const chapters = pages.map(page => nav?.querySelector(`a[href="#${page.id}"]`)?.closest('.nav-group'));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  let current = 0;
+  let pending = null; // page a button or key press is heading to, so repeated presses keep counting from there
+  const render = () => {
+    const ko = document.documentElement.dataset.lang === 'ko';
+    count.textContent = `${current + 1} / ${pages.length}`;
+    title.textContent = pages[current].dataset[ko ? 'pageKo' : 'pageEn'] || '';
+    const chapter = chapters[current];
+    group.textContent = chapter?.querySelector(`.nav-top .lang-${ko ? 'ko' : 'en'}`)?.textContent || '';
+    nav?.querySelectorAll('.nav-top').forEach(top => top.classList.toggle('active', top.parentElement === chapter));
+    nav?.querySelectorAll('.nav-sub a').forEach(link => {
+      if (link.hash === `#${pages[current].id}`) link.setAttribute('aria-current', 'page');
+      else link.removeAttribute('aria-current');
+    });
+    prev.disabled = current === 0;
+    next.disabled = current === pages.length - 1;
+  };
+  const go = step => {
+    pending = Math.max(0, Math.min(pages.length - 1, (pending ?? current) + step));
+    main.scrollTo({ left: pending * main.clientWidth, behavior: reduce.matches ? 'auto' : 'smooth' });
+  };
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
+  document.addEventListener('keydown', event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || document.querySelector('dialog[open]')) return;
+    if (event.target.closest?.('input, textarea, select, .table-wrap')) return;
+    if (event.key === 'ArrowRight') { event.preventDefault(); go(1); }
+    if (event.key === 'ArrowLeft') { event.preventDefault(); go(-1); }
+  });
+  // The page in view is the one whose left edge is nearest the scroll position.
+  main.addEventListener('scroll', () => {
+    const position = main.scrollLeft / main.clientWidth;
+    if (pending !== null && Math.abs(position - pending) < 0.01) pending = null;
+    const index = Math.max(0, Math.min(pages.length - 1, Math.round(position)));
+    if (index !== current) { current = index; render(); }
+  }, { passive: true });
+  // A swipe or a header link takes over from a pending button press.
+  ['pointerdown', 'wheel'].forEach(type => main.addEventListener(type, () => { pending = null; }, { passive: true }));
+  document.querySelectorAll('a[href^="#"]').forEach(link => link.addEventListener('click', () => { pending = null; }));
+  new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-lang'] });
+  render();
 })();
