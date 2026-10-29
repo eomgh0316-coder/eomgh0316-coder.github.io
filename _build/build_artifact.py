@@ -1,6 +1,6 @@
 """Package the hosted site (index.html + fonts-inline.css + styles.css + app.js) as one claude.ai artifact page.
 
-The artifact viewer wraps the file in its own <html>/<head>/<body>, cannot print (so the Print CV buttons are removed),
+The artifact viewer wraps the file in its own <html>/<head>/<body>, cannot open site-relative files (so the CV link points at the hosted PDF),
 and only reliably loads inlined fonts. The language attribute is set by a tiny script at the very top so the page
 never flashes both languages before app.js runs. Referenced images and videos are copied next to the page.
 Usage: python build_artifact.py <site_dir> <out_dir>
@@ -13,7 +13,8 @@ html = (site / 'index.html').read_text(encoding='utf-8')
 
 desc = re.search(r'<meta name="description" content="([^"]*)"', html)
 body = re.search(r'<body[^>]*>(.*)</body>', html, re.S).group(1)
-body, n_print = re.subn(r'<button\b[^>]*\bdata-print\b[^>]*>.*?</button>', '', body, flags=re.S)  # window.print() is inert in the viewer
+body, n_cv = re.subn(r'href="(Ga-Hyeon_Eom_CV\.pdf)"', r'href="https://eomgh0316-coder.github.io/\1"', body)
+assert n_cv == 1, f'CV link matched {n_cv}'
 body = re.sub(r'<script\b[^>]*\bsrc="app\.js"[^>]*>\s*</script>', '', body)
 # mailto: is unreliable in the viewer: the hero button jumps to the contact section, and the address becomes
 # selectable text next to the copy button (app.js selects its first text node when the clipboard API is refused).
@@ -49,5 +50,5 @@ for rel in media:
     dest = out / rel
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(site / rel, dest)
-print(f'artifact page: {len(page) / 1024:.0f} KB; {len(media)} media files; print buttons removed: {n_print}')
+print(f'artifact page: {len(page) / 1024:.0f} KB; {len(media)} media files; CV link rewritten: {n_cv}')
 print('MEDIA ' + ' '.join(media))

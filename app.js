@@ -135,7 +135,6 @@
       toast(copied ? (ko ? '이메일 주소를 복사했습니다.' : 'Email address copied.') : (ko ? '주소를 선택했습니다. Ctrl+C(⌘C)로 복사하세요.' : 'Address selected. Press Ctrl+C (⌘C) to copy.'));
     }
   });
-  document.querySelectorAll('[data-print]').forEach(button => button.addEventListener('click', () => window.print()));
   let savedLanguage = 'en';
   try { savedLanguage = localStorage.getItem('gheom-language') || 'en'; } catch (_) {}
   setLanguage(savedLanguage);

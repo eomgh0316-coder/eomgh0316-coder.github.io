@@ -296,7 +296,7 @@ dialog#image-dialog::backdrop { background:rgba(10,13,16,.86); backdrop-filter:b
 .brand-monogram { position:relative; display:flex; width:39px; height:40px; align-items:center; justify-content:center; border:1px solid #d5dde3; border-radius:3px; background:var(--paper-deep); font:700 1rem/1 var(--sans); letter-spacing:-.02em; }
 .brand-monogram > span { align-self:flex-end; margin:0 1px 5px 2px; color:var(--copper); font-size:.75em; }
 .brand .brand-name { font-size:1.0625rem; font-weight:700; line-height:1.2; letter-spacing:-.01em; }
-.cv-print { min-height:36px; padding:8px 11px; border:1px solid #cfd8df; border-radius:4px; background:transparent; font-size:.8125rem; font-weight:700; white-space:nowrap; }
+.cv-print { display:inline-flex; align-items:center; justify-content:center; color:var(--ink); text-decoration:none; min-height:36px; padding:8px 11px; border:1px solid #cfd8df; border-radius:4px; background:transparent; font-size:.8125rem; font-weight:700; white-space:nowrap; }
 .cv-print:hover { background:var(--copper-soft); border-color:var(--copper); }
 .cv-print > span[aria-hidden] { margin-left:5px; }
 .name-dot { color:var(--copper); }
@@ -666,9 +666,10 @@ main section[id],.additional-research[id],[data-section] { scroll-margin-top:96p
  .brand { gap:9px; }
  .brand-monogram { width:34px; height:34px; }
  .brand-monogram > span { margin-bottom:6px; }
- .cv-print { position:relative; width:34px; min-width:34px; min-height:36px; padding:0; font-size:16px; }
+ .cv-print { position:relative; min-width:34px; min-height:36px; padding:0 7px; }
+ .cv-print::before { content:"CV"; content:"CV" / ""; font-size:.8125rem; font-weight:700; }  /* short visible label; the full one stays for screen readers */
  .cv-print > .lang-en,.cv-print > .lang-ko { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); clip-path:inset(50%); white-space:nowrap; }
- .cv-print > span[aria-hidden] { margin:0; }
+ .cv-print > span[aria-hidden] { display:none; }
  .hero-location { margin-top:21px; }
  .hero-image > img { object-fit:contain; }
  .section-heading .section-number { flex-basis:18px; }
@@ -691,7 +692,7 @@ main section[id],.additional-research[id],[data-section] { scroll-margin-top:96p
  .header-actions { gap:7px; }
  .header-inner { gap:9px; }
 }
-/* Below 360px Print CV no longer fits; browser printing still works. */
+/* Below 360px the CV link no longer fits beside the menu. */
 @media (max-width:359px) { .cv-print { display:none; } }
 @media print {
  .cv-print,.copy-email,.empty-state,.table-bottom { display:none!important; }
