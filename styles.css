@@ -858,3 +858,13 @@ html[data-lang="ko"] .pager-meta { letter-spacing:0; }
   .desktop-nav .nav-sub a { padding:8px 10px; font-size:.9375rem; }
 }
 @media (prefers-reduced-motion:reduce) { .nav-sub { transform:none; transition:none; } }
+/* Photographs fill their frame; the product shots in the other galleries keep their white mat. */
+.photo-gallery img,.gallery figure.photo img { height:auto; padding:0; object-fit:cover; background:var(--paper-deep); }
+.photo-gallery + .section-note { margin-top:30px; }
+.gallery-label { margin:40px 0 0; }
+.gallery-label + .photo-gallery { margin-top:14px; }
+.methods-grid + .gallery-label { margin-top:0; }
+.page-photo img { aspect-ratio:4/3; object-fit:cover; }
+.contact-grid .page-photo.portrait { width:min(100%,220px); }
+.contact-grid .page-photo.portrait img { aspect-ratio:4/5; border-radius:14px; }
+@media (max-width:680px) { .photo-gallery:has(> figure:nth-child(4)) { grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 12px; } }
